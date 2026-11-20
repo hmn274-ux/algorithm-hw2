@@ -4,33 +4,37 @@ ALPHABET = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 BASE = len(ALPHABET)
 
 
-def encode_base62(number: int) -> str:
+def encode(n: int) -> str:
     """Encode a non-negative integer as a base62 string."""
-    if isinstance(number, bool) or not isinstance(number, int):
+    if isinstance(n, bool) or not isinstance(n, int):
         raise TypeError("number must be an integer")
-    if number < 0:
+    if n < 0:
         raise ValueError("number must be non-negative")
-    if number == 0:
+    if n == 0:
         return ALPHABET[0]
 
     encoded = []
-    while number:
-        number, remainder = divmod(number, BASE)
+    while n:
+        n, remainder = divmod(n, BASE)
         encoded.append(ALPHABET[remainder])
     return "".join(reversed(encoded))
 
 
-def decode_base62(code: str) -> int:
+def decode(s: str) -> int:
     """Decode a base62 string to a non-negative integer."""
-    if not isinstance(code, str):
+    if not isinstance(s, str):
         raise TypeError("code must be a string")
-    if not code:
+    if not s:
         raise ValueError("code must not be empty")
 
     number = 0
-    for character in code:
+    for character in s:
         digit = ALPHABET.find(character)
         if digit < 0:
             raise ValueError(f"invalid base62 character: {character!r}")
         number = number * BASE + digit
     return number
+
+
+encode_base62 = encode
+decode_base62 = decode
