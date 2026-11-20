@@ -25,13 +25,21 @@ class URLShortener:
         return code
 
     def expand(self, code):
+        if not isinstance(code, str):
+            raise KeyError(code)
         return self._code_to_url[code]
 
     @staticmethod
     def _validate_url(url):
         if not isinstance(url, str):
             raise TypeError("url must be a string")
-        if not url or url != url.strip() or any(character.isspace() for character in url):
+        if (
+            not url
+            or url != url.strip()
+            or any(character.isspace() or ord(character) < 32 or ord(character) == 127
+                   for character in url)
+            or "\\" in url
+        ):
             raise ValueError("url must be an absolute HTTP or HTTPS URL")
         try:
             parsed = urlsplit(url)
