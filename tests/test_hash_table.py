@@ -4,6 +4,13 @@ from src.hash_table import HashTable
 
 
 class HashTableTests(unittest.TestCase):
+    def test_initial_capacity_and_horner_hash(self):
+        table = HashTable()
+
+        self.assertEqual(table.capacity, 8)
+        self.assertEqual(table.hash_index(""), 0)
+        self.assertEqual(table.hash_index("ab"), 1)
+
     def test_insert_update_lookup_and_membership(self):
         table = HashTable()
         table["url"] = "https://example.com"
@@ -15,6 +22,13 @@ class HashTableTests(unittest.TestCase):
         self.assertIn("url", table)
         self.assertNotIn("missing", table)
         self.assertEqual(len(table), 1)
+
+    def test_empty_string_key_is_supported(self):
+        table = HashTable()
+        table[""] = "empty"
+
+        self.assertIn("", table)
+        self.assertEqual(table[""], "empty")
 
     def test_collisions_in_final_bucket_are_resolved(self):
         table = HashTable()
@@ -47,9 +61,12 @@ class HashTableTests(unittest.TestCase):
     def test_table_grows_after_load_threshold(self):
         table = HashTable()
         initial_capacity = table.capacity
-        for key in ("a", "b", "c", "d", "e", "f", "g"):
+        for key in ("a", "b", "c", "d", "e", "f"):
             table[key] = key
+        self.assertEqual(table.capacity, initial_capacity)
+        self.assertEqual(table.load_factor, 0.75)
 
+        table["g"] = "g"
         self.assertGreater(table.capacity, initial_capacity)
         for key in ("a", "b", "c", "d", "e", "f", "g"):
             self.assertEqual(table[key], key)
@@ -60,6 +77,10 @@ class HashTableTests(unittest.TestCase):
             table[1] = "value"
         with self.assertRaises(TypeError):
             table.get(1)
+        with self.assertRaises(TypeError):
+            self.assertFalse(1 in table)
+        with self.assertRaises(TypeError):
+            del table[1]
 
 
 if __name__ == "__main__":
