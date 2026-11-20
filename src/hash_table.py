@@ -47,10 +47,14 @@ class HashTable:
     def hash_index(self, key):
         """Return the bucket index produced by the Horner polynomial."""
         self._validate_key(key)
-        value = 0
-        for character in key:
-            value = (value * self._HASH_BASE + ord(character)) % self.capacity
-        return value
+        return self._hash_key(key)
+
+    def hash_trace(self, key):
+        """Return the bucket index and intermediate Horner values for a key."""
+        self._validate_key(key)
+        steps = []
+        index = self._hash_key(key, steps)
+        return index, steps
 
     def __setitem__(self, key, value):
         index = self.hash_index(key)
@@ -153,6 +157,16 @@ class HashTable:
                     entry.key, entry.value, self._buckets[index]
                 )
                 entry = entry.next
+
+    def _hash_key(self, key, steps=None):
+        value = 0
+        for position, character in enumerate(key):
+            previous = value
+            code_point = ord(character)
+            value = (value * self._HASH_BASE + code_point) % self.capacity
+            if steps is not None:
+                steps.append((position, character, code_point, previous, value))
+        return value
 
     @staticmethod
     def _validate_key(key):
