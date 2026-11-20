@@ -71,6 +71,16 @@ class HashTableTests(unittest.TestCase):
         for key in ("a", "b", "c", "d", "e", "f", "g"):
             self.assertEqual(table[key], key)
 
+    def test_none_max_load_keeps_capacity_fixed(self):
+        table = HashTable(initial_capacity=8, max_load=None)
+        for number in range(32):
+            table[str(number)] = number
+
+        self.assertEqual(table.capacity, 8)
+        self.assertEqual(len(table), 32)
+        for number in range(32):
+            self.assertEqual(table[str(number)], number)
+
     def test_non_string_keys_are_rejected(self):
         table = HashTable()
         with self.assertRaises(TypeError):

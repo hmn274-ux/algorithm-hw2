@@ -1,5 +1,7 @@
 """A string-keyed hash table using separate chaining."""
 
+import math
+
 
 class _Entry:
     __slots__ = ("key", "value", "next")
@@ -16,15 +18,23 @@ class HashTable:
     _HASH_BASE = 31
     _MAX_LOAD_FACTOR = 0.75
 
-    def __init__(self, initial_capacity=8):
+    def __init__(self, initial_capacity=8, max_load=_MAX_LOAD_FACTOR):
         if (
             isinstance(initial_capacity, bool)
             or not isinstance(initial_capacity, int)
             or initial_capacity < 1
         ):
             raise ValueError("initial_capacity must be a positive integer")
+        if max_load is not None and (
+            isinstance(max_load, bool)
+            or not isinstance(max_load, (int, float))
+            or max_load <= 0
+            or (isinstance(max_load, float) and not math.isfinite(max_load))
+        ):
+            raise ValueError("max_load must be a positive finite number or None")
         self._buckets = [None] * initial_capacity
         self._size = 0
+        self._max_load = max_load
 
     @property
     def capacity(self):
@@ -51,7 +61,10 @@ class HashTable:
                 return
             entry = entry.next
 
-        if (self._size + 1) / self.capacity > self._MAX_LOAD_FACTOR:
+        if (
+            self._max_load is not None
+            and (self._size + 1) / self.capacity > self._max_load
+        ):
             self._resize(self.capacity * 2)
             index = self.hash_index(key)
         self._buckets[index] = _Entry(key, value, self._buckets[index])
